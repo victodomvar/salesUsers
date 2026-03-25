@@ -1,4 +1,4 @@
-package com.salesusers.usermanagement.infrastructure.api.mapper;
+package com.salesusers.usermanagement.presentation.mapper;
 
 import com.salesusers.usermanagement.application.port.in.CreateUserCommand;
 import com.salesusers.usermanagement.application.port.in.UserResult;

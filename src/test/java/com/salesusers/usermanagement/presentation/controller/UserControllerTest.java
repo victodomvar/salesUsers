@@ -1,4 +1,4 @@
-package com.salesusers.usermanagement.infrastructure.api;
+package com.salesusers.usermanagement.presentation.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

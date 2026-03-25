@@ -1,11 +1,11 @@
-package com.salesusers.usermanagement.infrastructure.api;
+package com.salesusers.usermanagement.presentation.controller;
 
 import com.salesusers.usermanagement.application.port.in.CreateUserUseCase;
 import com.salesusers.usermanagement.application.port.in.UserResult;
 import com.salesusers.usermanagement.infrastructure.api.generated.UsersApi;
 import com.salesusers.usermanagement.infrastructure.api.generated.model.CreateUserRequest;
 import com.salesusers.usermanagement.infrastructure.api.generated.model.UserResponse;
-import com.salesusers.usermanagement.infrastructure.api.mapper.UserApiMapper;
+import com.salesusers.usermanagement.presentation.mapper.UserApiMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
