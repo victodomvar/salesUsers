@@ -1,37 +1,99 @@
 # User Management Service
 
-Initial template for a user-management microservice focused on the sales domain.
+`user-management-service` is a small Spring Boot 3.3.5 microservice built with Java 17. It exposes a simple user-creation endpoint and is structured as a conventional layered service with controller, service, DTO, domain, repository, mapper, configuration, and exception packages.
 
-## Scope of this first step
+## Project structure
 
-- Spring Boot application bootstrap
-- Base package structure
-- Placeholder REST endpoint
-- Basic actuator exposure
-- Test skeleton
+```text
+src
+├── main
+│   ├── java/com/salesusers/usermanagement
+│   │   ├── config
+│   │   ├── controller
+│   │   ├── domain
+│   │   ├── dto
+│   │   │   ├── request
+│   │   │   └── response
+│   │   ├── exception
+│   │   ├── mapper
+│   │   ├── repository
+│   │   ├── service
+│   │   └── UserManagementServiceApplication.java
+│   └── resources
+│       ├── application.yml
+│       └── openapi/user-management.yaml
+└── test
+    └── java/com/salesusers/usermanagement
+        ├── controller
+        └── UserManagementServiceApplicationTests.java
+```
 
-## Planned next steps
+## API
 
-- Define the user aggregate and persistence model
-- Add a database with migrations
-- Implement CRUD operations
-- Add validation, exception handling, and security
-- Add Docker and CI support
+The service currently keeps users in memory and exposes:
 
-## Run locally
+- `POST /users`
+- `GET /actuator/health`
+- `GET /actuator/health/liveness`
+- `GET /actuator/health/readiness`
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Alice Doe","email":"alice@example.com"}'
+```
+
+## Build and run
+
+Run tests:
+
+```bash
+mvn test
+```
+
+Run locally:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The service starts on port `8080`.
+The application listens on port `8080` by default.
 
-## Placeholder endpoint
+## Container build
 
-```text
-GET /api/v1/users
+Build the image locally:
+
+```bash
+docker build -t salesusers:local .
 ```
 
-Current behavior: returns `501 Not Implemented` to mark the API entry point without committing to the final contract yet.
+Run the container:
 
-# salesUsers
+```bash
+docker run --rm -p 8080:8080 salesusers:local
+```
+
+## Kubernetes deployment
+
+Apply the included manifests:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+Port-forward locally:
+
+```bash
+kubectl -n deibidsales port-forward service/salesusers 8080:80
+```
+
+## Notes
+
+- Persistence is intentionally in-memory for now.
+- Security and database integration are intentionally not included in this refactor.
+- The OpenAPI contract remains under `src/main/resources/openapi/user-management.yaml`.
