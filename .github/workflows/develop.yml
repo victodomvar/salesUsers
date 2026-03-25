@@ -40,6 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: verify
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop'
+    env:
+      # These secrets must exist either as repository secrets or as environment secrets
+      # with the exact same names.
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      KUBE_CONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -61,11 +67,11 @@ jobs:
 
       - name: Debug Docker secrets presence
         run: |
-          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+          if [ -z "$DOCKERHUB_USERNAME" ]; then
             echo "DOCKERHUB_USERNAME is empty"
             exit 1
           fi
-          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+          if [ -z "$DOCKERHUB_TOKEN" ]; then
             echo "DOCKERHUB_TOKEN is empty"
             exit 1
           fi
@@ -74,8 +80,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -93,8 +99,6 @@ jobs:
           version: v1.30.0
 
       - name: Configure kubeconfig
-        env:
-          KUBE_CONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }}
         run: |
           mkdir -p "${HOME}/.kube"
           echo "$KUBE_CONFIG_BASE64" | base64 --decode > "${HOME}/.kube/config"
