@@ -1,4 +1,4 @@
-package com.salesusers.usermanagement.exception;
+package com.salesusers.usermanagement.domain.exception;
 
 public class DuplicateUserEmailException extends RuntimeException {
 

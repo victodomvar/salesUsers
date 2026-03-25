@@ -1,5 +1,6 @@
-package com.salesusers.usermanagement.exception;
+package com.salesusers.usermanagement.shared.exception;
 
+import com.salesusers.usermanagement.domain.exception.DuplicateUserEmailException;
 import com.salesusers.usermanagement.infrastructure.api.generated.model.ErrorResponse;
 import java.time.Clock;
 import java.time.OffsetDateTime;

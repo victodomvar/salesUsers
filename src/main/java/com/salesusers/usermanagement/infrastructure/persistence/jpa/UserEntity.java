@@ -1,4 +1,4 @@
-package com.salesusers.usermanagement.domain;
+package com.salesusers.usermanagement.infrastructure.persistence.jpa;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     @Id
     private UUID id;
@@ -23,10 +23,10 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    protected User() {
+    protected UserEntity() {
     }
 
-    public User(UUID id, String name, String email, OffsetDateTime createdAt) {
+    public UserEntity(UUID id, String name, String email, OffsetDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
