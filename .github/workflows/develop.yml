@@ -59,6 +59,18 @@ jobs:
           echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
           echo "IMAGE_BRANCH_TAG=develop-latest" >> "$GITHUB_ENV"
 
+      - name: Debug Docker secrets presence
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "DOCKERHUB_USERNAME is empty"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "DOCKERHUB_TOKEN is empty"
+            exit 1
+          fi
+          echo "Docker secrets are present"
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -91,6 +103,9 @@ jobs:
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/postgres-secret.yaml
+          kubectl apply -f k8s/postgres-deployment.yaml
+          kubectl apply -f k8s/postgres-service.yaml
           kubectl apply -f k8s/configmap.yaml
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml

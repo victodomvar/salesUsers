@@ -31,43 +31,18 @@ Successful response:
 }
 ```
 
-## Project structure
-
-```text
-src
-├── main
-│   ├── java/com/salesusers/usermanagement
-│   │   ├── config
-│   │   ├── controller
-│   │   ├── domain
-│   │   ├── dto
-│   │   │   ├── request
-│   │   │   └── response
-│   │   ├── exception
-│   │   ├── mapper
-│   │   ├── repository
-│   │   ├── service
-│   │   └── UserManagementServiceApplication.java
-│   └── resources
-│       ├── application.yml
-│       ├── db/migration
-│       └── openapi/user-management.yaml
-└── test
-    └── java/com/salesusers/usermanagement
-        ├── controller
-        ├── service
-        └── UserManagementServiceApplicationTests.java
-```
-
 ## Database
 
-The application uses a small H2 relational database with JPA and Flyway.
+The service supports:
 
-- local and container default: file-based H2 under `/tmp/salesusers-db`
-- tests: in-memory H2
-- schema initialization: `src/main/resources/db/migration/V1__create_users_table.sql`
+- local/test default: H2
+- Kubernetes deployment: PostgreSQL
 
-This keeps the service self-contained and easy to run without adding external infrastructure.
+Flyway initializes the schema from:
+
+```text
+src/main/resources/db/migration/V1__create_users_table.sql
+```
 
 ## Build and run
 
@@ -77,7 +52,7 @@ Verify the project:
 mvn verify
 ```
 
-Run locally:
+Run locally with the default H2 configuration:
 
 ```bash
 mvn spring-boot:run
@@ -100,7 +75,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 
 ## Docker
 
-Image name:
+Application image name:
 
 ```text
 victodomvar/salesusers
@@ -124,7 +99,7 @@ The workflow in `.github/workflows/develop.yml`:
 
 1. runs `mvn verify`
 2. builds and pushes `victodomvar/salesusers`
-3. deploys the application manifests from `k8s/`
+3. deploys PostgreSQL and the application manifests from `k8s/`
 
 Published tags:
 
@@ -139,12 +114,18 @@ Required repository secrets:
 
 ## Kubernetes deployment
 
-The included manifests deploy the application with the same file-based H2 configuration used in Docker.
+The included manifests deploy:
+
+- `salesusers-postgres` using `postgres:16-alpine`
+- `salesusers` configured to connect to that PostgreSQL service
 
 Apply manually if needed:
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/postgres-secret.yaml
+kubectl apply -f k8s/postgres-deployment.yaml
+kubectl apply -f k8s/postgres-service.yaml
 kubectl apply -f k8s/configmap.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
@@ -158,7 +139,7 @@ kubectl -n deibidsales port-forward service/salesusers 8080:80
 
 ## Notes
 
-- Persistence is intentionally minimal and local to the service process.
+- The PostgreSQL manifest uses a simple in-cluster deployment with development credentials.
 - Security is intentionally not included.
 - The OpenAPI contract remains under `src/main/resources/openapi/user-management.yaml`.
 - The request/response contract used by the controller is generated at build time by the OpenAPI Generator Maven plugin.
