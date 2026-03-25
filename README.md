@@ -34,3 +34,4 @@ GET /api/v1/users
 
 Current behavior: returns `501 Not Implemented` to mark the API entry point without committing to the final contract yet.
 
+# salesUsers
