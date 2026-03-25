@@ -1,6 +1,35 @@
 # User Management Service
 
-`user-management-service` is a small Spring Boot 3.3.5 microservice built with Java 17. It exposes a simple user-creation endpoint and is structured as a conventional layered service with controller, service, DTO, domain, repository, mapper, configuration, and exception packages.
+`user-management-service` is a small Spring Boot 3.3.5 API built with Java 17 and Maven. It exposes a single user-creation endpoint, persists users with Spring Data JPA, initializes its schema with Flyway, and generates its API contract types from OpenAPI Generator during the Maven build.
+
+## API
+
+Create a user:
+
+```http
+POST /api/v1/users
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com"
+}
+```
+
+Successful response:
+
+```json
+{
+  "id": "0d9d6f53-719d-4af3-9ff4-67b6dfb1db2d",
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "createdAt": "2026-03-25T12:00:00Z"
+}
+```
 
 ## Project structure
 
@@ -21,36 +50,31 @@ src
 │   │   └── UserManagementServiceApplication.java
 │   └── resources
 │       ├── application.yml
+│       ├── db/migration
 │       └── openapi/user-management.yaml
 └── test
     └── java/com/salesusers/usermanagement
         ├── controller
+        ├── service
         └── UserManagementServiceApplicationTests.java
 ```
 
-## API
+## Database
 
-The service currently keeps users in memory and exposes:
+The application uses a small H2 relational database with JPA and Flyway.
 
-- `POST /users`
-- `GET /actuator/health`
-- `GET /actuator/health/liveness`
-- `GET /actuator/health/readiness`
+- local and container default: file-based H2 under `/tmp/salesusers-db`
+- tests: in-memory H2
+- schema initialization: `src/main/resources/db/migration/V1__create_users_table.sql`
 
-Example request:
-
-```bash
-curl -X POST http://localhost:8080/users \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"Alice Doe","email":"alice@example.com"}'
-```
+This keeps the service self-contained and easy to run without adding external infrastructure.
 
 ## Build and run
 
-Run tests:
+Verify the project:
 
 ```bash
-mvn test
+mvn verify
 ```
 
 Run locally:
@@ -59,25 +83,65 @@ Run locally:
 mvn spring-boot:run
 ```
 
-The application listens on port `8080` by default.
+The application listens on port `8080` by default and exposes:
 
-## Container build
+- `POST /api/v1/users`
+- `GET /actuator/health`
+- `GET /actuator/health/liveness`
+- `GET /actuator/health/readiness`
 
-Build the image locally:
-
-```bash
-docker build -t salesusers:local .
-```
-
-Run the container:
+Example request:
 
 ```bash
-docker run --rm -p 8080:8080 salesusers:local
+curl -X POST http://localhost:8080/api/v1/users \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Jane Doe","email":"jane@example.com"}'
 ```
+
+## Docker
+
+Image name:
+
+```text
+victodomvar/salesusers
+```
+
+Build locally:
+
+```bash
+docker build -t victodomvar/salesusers:local .
+```
+
+Run locally:
+
+```bash
+docker run --rm -p 8080:8080 victodomvar/salesusers:local
+```
+
+## GitHub Actions
+
+The workflow in `.github/workflows/develop.yml`:
+
+1. runs `mvn verify`
+2. builds and pushes `victodomvar/salesusers`
+3. deploys the application manifests from `k8s/`
+
+Published tags:
+
+- `victodomvar/salesusers:<git-sha>`
+- `victodomvar/salesusers:develop-latest`
+
+Required repository secrets:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `KUBE_CONFIG_BASE64`
 
 ## Kubernetes deployment
 
-Apply the included manifests:
+The included manifests deploy the application with the same file-based H2 configuration used in Docker.
+
+Apply manually if needed:
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
@@ -94,6 +158,7 @@ kubectl -n deibidsales port-forward service/salesusers 8080:80
 
 ## Notes
 
-- Persistence is intentionally in-memory for now.
-- Security and database integration are intentionally not included in this refactor.
+- Persistence is intentionally minimal and local to the service process.
+- Security is intentionally not included.
 - The OpenAPI contract remains under `src/main/resources/openapi/user-management.yaml`.
+- The request/response contract used by the controller is generated at build time by the OpenAPI Generator Maven plugin.

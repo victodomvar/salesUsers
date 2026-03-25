@@ -1,4 +1,11 @@
 package com.salesusers.usermanagement.dto.request;
 
-public record CreateUserRequestDto(String name, String email) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CreateUserRequestDto(
+    @NotBlank @Size(max = 255) String name,
+    @NotBlank @Email @Size(max = 320) String email
+) {
 }

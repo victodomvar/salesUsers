@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +18,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +47,7 @@ class UserServiceTest {
 
     @Test
     void shouldNormalizeInputAndReturnCreatedUser() {
+        when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UserResponseDto response = userService.createUser(
@@ -56,27 +57,27 @@ class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertNotNull(savedUser.id());
-        assertEquals("Alice Doe", savedUser.name());
-        assertEquals("alice@example.com", savedUser.email());
-        assertEquals(OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC), savedUser.createdAt());
+        assertNotNull(savedUser.getId());
+        assertEquals("Alice Doe", savedUser.getName());
+        assertEquals("alice@example.com", savedUser.getEmail());
+        assertEquals(OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC), savedUser.getCreatedAt());
 
-        assertEquals(savedUser.id(), response.id());
+        assertEquals(savedUser.getId(), response.id());
         assertEquals("Alice Doe", response.name());
         assertEquals("alice@example.com", response.email());
         assertEquals(OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC), response.createdAt());
     }
 
     @Test
-    void shouldPropagateDuplicateEmailExceptionFromRepository() {
-        DuplicateUserEmailException exception = new DuplicateUserEmailException("alice@example.com");
-        when(userRepository.save(any(User.class))).thenThrow(exception);
+    void shouldThrowDuplicateEmailExceptionWhenEmailAlreadyExists() {
+        when(userRepository.existsByEmail("alice@example.com")).thenReturn(true);
 
         DuplicateUserEmailException thrown = assertThrows(
             DuplicateUserEmailException.class,
             () -> userService.createUser(new CreateUserRequestDto("Alice Doe", "alice@example.com"))
         );
 
-        assertSame(exception, thrown);
+        assertEquals("A user with email 'alice@example.com' already exists.", thrown.getMessage());
+        verify(userRepository, never()).save(any(User.class));
     }
 }

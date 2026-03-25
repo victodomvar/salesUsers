@@ -20,7 +20,7 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -37,7 +37,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturnBadRequestForInvalidPayload() throws Exception {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -60,12 +60,12 @@ class UserControllerTest {
             }
             """;
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
             .andExpect(status().isConflict())

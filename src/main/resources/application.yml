@@ -1,6 +1,16 @@
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:user-management-service}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:/tmp/salesusers-db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
 
 server:
   port: ${SERVER_PORT:8080}

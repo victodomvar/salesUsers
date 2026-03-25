@@ -9,8 +9,8 @@ RUN mvn -B -DskipTests clean package
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-ENV SERVER_PORT=8080
-ENV JAVA_OPTS=""
+ENV SERVER_PORT=8080 \
+    JAVA_OPTS=""
 
 COPY --from=builder /workspace/target/user-management-service-0.0.1-SNAPSHOT.jar /app/app.jar
 

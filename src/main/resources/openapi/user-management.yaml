@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API contract for managing sales users.
 paths:
-  /users:
+  /api/v1/users:
     post:
       tags:
         - Users
