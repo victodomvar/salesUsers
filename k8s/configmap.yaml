@@ -8,9 +8,7 @@ metadata:
     app.kubernetes.io/part-of: salesusers
 data:
   SERVER_PORT: "8080"
-  SPRING_DATASOURCE_URL: "jdbc:h2:file:/tmp/salesusers-db;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
-  SPRING_DATASOURCE_USERNAME: "sa"
-  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://salesusers-postgres:5432/salesusers"
   MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info"
   MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
   MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "never"
